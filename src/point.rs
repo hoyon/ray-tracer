@@ -9,15 +9,15 @@ pub struct Tuple {
 }
 
 impl Tuple {
-    fn point(x: f32, y: f32, z: f32) -> Tuple {
+    fn point(x: f32, y: f32, z: f32) -> Self {
         Tuple{x, y, z, w: 1.0}
     }
 
-    fn vector(x: f32, y: f32, z: f32) -> Tuple {
+    fn vector(x: f32, y: f32, z: f32) -> Self {
         Tuple{x, y, z, w: 0.0}
     }
 
-    fn raw(x: f32, y: f32, z: f32, w: f32) -> Tuple {
+    fn raw(x: f32, y: f32, z: f32, w: f32) -> Self {
         Tuple{x, y, z, w}
     }
 
@@ -27,6 +27,31 @@ impl Tuple {
 
     fn is_vector(&self) -> bool {
         self.w == 0.0
+    }
+
+    fn magnitude(&self) -> f32 {
+        let sum = (self.x * self.x) + (self.y * self.y) + (self.z * self.z) + (self.w * self.w);
+        sum.sqrt()
+    }
+
+    fn normalise(&self) -> Self {
+        let magnitude = self.magnitude();
+        Tuple::raw(self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude)
+    }
+
+    fn dot(a: &Self, b: &Self) -> f32 {
+        a.x * b.x +
+        a.y * b.y +
+        a.z * b.z +
+        a.w * b.w
+    }
+
+    fn cross(a: &Self, b: &Self) -> Self {
+        Tuple::vector(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        )
     }
 }
 
@@ -185,5 +210,49 @@ mod tests {
     fn can_divide_a_tuple_by_fraction() {
         let t = Tuple::raw(1.0, -2.0, 3.0, -4.0);
         assert_eq!(t / 2.0, Tuple::raw(0.5, -1.0, 1.5, -2.0));
+    }
+
+    #[test]
+    fn correctly_calculates_magnitude() {
+        assert_eq!(Tuple::vector(1.0, 0.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(0.0, 1.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(0.0, 0.0, 1.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(1.0, 2.0, 3.0).magnitude(), 14_f32.sqrt());
+        assert_eq!(Tuple::vector(-1.0, -2.0, -3.0).magnitude(), 14_f32.sqrt());
+    }
+
+    #[test]
+    fn normalise_works_for_single_direction() {
+        let v = Tuple::vector(4.0, 0.0, 0.0);
+        assert_eq!(v.normalise(), Tuple::vector(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn normalise_works_for_complex_vector() {
+        let v = Tuple::vector(1.0, 2.0, 3.0);
+        assert_eq!(v.normalise(), Tuple::vector(0.26726124, 0.5345225, 0.8017837));
+    }
+
+    #[test]
+    fn magnitude_of_normalised_vector_is_one() {
+        let v = Tuple::vector(1.0, 2.0, 2.0);
+        assert_eq!(v.normalise().magnitude(), 1.0);
+    }
+
+    #[test]
+    fn dot_product_works() {
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+
+        assert_eq!(Tuple::dot(&a, &b), 20.0);
+    }
+
+    #[test]
+    fn cross_product_works() {
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+
+        assert_eq!(Tuple::cross(&a, &b), Tuple::vector(-1.0, 2.0, -1.0));
+        assert_eq!(Tuple::cross(&b, &a), Tuple::vector(1.0, -2.0, 1.0));
     }
 }
