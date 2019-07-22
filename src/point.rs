@@ -1,19 +1,44 @@
-type Tuple = (f32, f32, f32, f32);
-
-fn point(x: f32, y: f32, z: f32) -> Tuple {
-    (x, y, z, 1.0)
+#[derive(Debug)]
+pub struct Tuple {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32
 }
 
-fn vector(x: f32, y: f32, z: f32) -> Tuple {
-    (x, y, z, 0.0)
+impl Tuple {
+    fn point(x: f32, y: f32, z: f32) -> Tuple {
+        Tuple{x, y, z, w: 1.0}
+    }
+
+    fn vector(x: f32, y: f32, z: f32) -> Tuple {
+        Tuple{x, y, z, w: 0.0}
+    }
+
+    fn raw(x: f32, y: f32, z: f32, w: f32) -> Tuple {
+        Tuple{x, y, z, w}
+    }
+
+    fn is_point(&self) -> bool {
+        (self.w - 1.0).abs() < std::f32::EPSILON
+    }
+
+    fn is_vector(&self) -> bool {
+        self.w == 0.0
+    }
 }
 
-fn is_point(tuple: &Tuple) -> bool {
-    (tuple.3 - 1.0).abs() < std::f32::EPSILON
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Self) -> bool {
+        float_equality(self.x, other.x) &&
+        float_equality(self.y, other.y) &&
+        float_equality(self.z, other.z) &&
+        float_equality(self.w, other.w)
+    }
 }
 
-fn is_vector(tuple: &Tuple) -> bool {
-    tuple.3 == 0.0
+fn float_equality(a: f32, b: f32) -> bool {
+    (a - b).abs() < std::f32::EPSILON
 }
 
 #[cfg(test)]
@@ -22,31 +47,41 @@ mod tests {
 
     #[test]
     fn point_makes_point() {
-        let p = point(1.3, 1.5, 45.8);
-        assert_eq!(p, (1.3, 1.5, 45.8, 1.0))
+        let p = Tuple::point(1.3, 1.5, 45.8);
+        assert_eq!(p, Tuple::raw(1.3, 1.5, 45.8, 1.0))
     }
 
     #[test]
     fn vector_makes_vector() {
-        let v = vector(1.3, 1.5, 45.8);
-        assert_eq!(v, (1.3, 1.5, 45.8, 0.0))
+        let v = Tuple::vector(1.3, 1.5, 45.8);
+        assert_eq!(v, Tuple::raw(1.3, 1.5, 45.8, 0.0))
     }
 
     #[test]
     fn is_point_check_works() {
-        let p = point(1.3, 1.5, 45.8);
-        let v = vector(1.3, 1.5, 45.8);
+        let p = Tuple::point(1.3, 1.5, 45.8);
+        let v = Tuple::vector(1.3, 1.5, 45.8);
 
-        assert!(is_point(&p));
-        assert!(is_point(&v) == false);
+        assert!(p.is_point());
+        assert!(v.is_point() == false);
     }
 
     #[test]
-    fn is_vector_check_works() {
-        let p = point(1.3, 1.5, 45.8);
-        let v = vector(1.3, 1.5, 45.8);
+    fn vector_check_works() {
+        let p = Tuple::point(1.3, 1.5, 45.8);
+        let v = Tuple::vector(1.3, 1.5, 45.8);
 
-        assert!(is_vector(&p) == false);
-        assert!(is_vector(&v));
+        assert!(p.is_vector() == false);
+        assert!(v.is_vector());
+    }
+
+    #[test]
+    fn equality_accounts_for_floating_errors() {
+        let a = 0.4 + 0.05;
+        let b = 0.45;
+        assert_ne!(a, b);
+
+        let p = Tuple::point(a, a, a);
+        assert_eq!(p, Tuple::raw(b, b, b, 1.0));
     }
 }
