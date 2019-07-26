@@ -1,6 +1,4 @@
-extern crate ray_tracer;
-
-use ray_tracer::point::Tuple;
+use ray_tracer::tuple::Tuple;
 use std::fmt;
 
 struct Projectile {
