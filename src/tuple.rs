@@ -1,5 +1,6 @@
 use std::fmt;
 use std::ops;
+use crate::util;
 
 #[derive(Clone, Copy)]
 pub struct Tuple {
@@ -60,10 +61,10 @@ impl Tuple {
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        float_equality(self.x, other.x)
-            && float_equality(self.y, other.y)
-            && float_equality(self.z, other.z)
-            && float_equality(self.w, other.w)
+        util::float_equality(self.x, other.x)
+            && util::float_equality(self.y, other.y)
+            && util::float_equality(self.z, other.z)
+            && util::float_equality(self.w, other.w)
     }
 }
 
@@ -126,10 +127,6 @@ impl fmt::Debug for Tuple {
             self.x, self.y, self.z, self.w
         )
     }
-}
-
-fn float_equality(a: f32, b: f32) -> bool {
-    (a - b).abs() < std::f32::EPSILON
 }
 
 #[cfg(test)]
