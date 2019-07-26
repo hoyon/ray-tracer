@@ -1,66 +1,69 @@
+use std::fmt;
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Clone, Copy)]
 pub struct Tuple {
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
 }
 
 impl Tuple {
-    fn point(x: f32, y: f32, z: f32) -> Self {
-        Tuple{x, y, z, w: 1.0}
+    pub fn point(x: f32, y: f32, z: f32) -> Self {
+        Tuple { x, y, z, w: 1.0 }
     }
 
-    fn vector(x: f32, y: f32, z: f32) -> Self {
-        Tuple{x, y, z, w: 0.0}
+    pub fn vector(x: f32, y: f32, z: f32) -> Self {
+        Tuple { x, y, z, w: 0.0 }
     }
 
-    fn raw(x: f32, y: f32, z: f32, w: f32) -> Self {
-        Tuple{x, y, z, w}
+    pub fn raw(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Tuple { x, y, z, w }
     }
 
-    fn is_point(&self) -> bool {
+    pub fn is_point(&self) -> bool {
         (self.w - 1.0).abs() < std::f32::EPSILON
     }
 
-    fn is_vector(&self) -> bool {
+    pub fn is_vector(&self) -> bool {
         self.w == 0.0
     }
 
-    fn magnitude(&self) -> f32 {
+    pub fn magnitude(&self) -> f32 {
         let sum = (self.x * self.x) + (self.y * self.y) + (self.z * self.z) + (self.w * self.w);
         sum.sqrt()
     }
 
-    fn normalise(&self) -> Self {
+    pub fn normalise(&self) -> Self {
         let magnitude = self.magnitude();
-        Tuple::raw(self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude)
+        Tuple::raw(
+            self.x / magnitude,
+            self.y / magnitude,
+            self.z / magnitude,
+            self.w / magnitude,
+        )
     }
 
-    fn dot(a: &Self, b: &Self) -> f32 {
-        a.x * b.x +
-        a.y * b.y +
-        a.z * b.z +
-        a.w * b.w
+    pub fn dot(a: &Self, b: &Self) -> f32 {
+        a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
     }
 
-    fn cross(a: &Self, b: &Self) -> Self {
+    pub fn cross(a: &Self, b: &Self) -> Self {
         Tuple::vector(
             a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x
+            a.x * b.y - a.y * b.x,
         )
     }
 }
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        float_equality(self.x, other.x) &&
-        float_equality(self.y, other.y) &&
-        float_equality(self.z, other.z) &&
-        float_equality(self.w, other.w)
+        float_equality(self.x, other.x)
+            && float_equality(self.y, other.y)
+            && float_equality(self.z, other.z)
+            && float_equality(self.w, other.w)
     }
 }
 
@@ -68,7 +71,12 @@ impl ops::Add for Tuple {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Tuple::raw(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z, self.w + rhs.w)
+        Tuple::raw(
+            self.x + rhs.x,
+            self.y + rhs.y,
+            self.z + rhs.z,
+            self.w + rhs.w,
+        )
     }
 }
 
@@ -76,7 +84,12 @@ impl ops::Sub for Tuple {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Tuple::raw(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w)
+        Tuple::raw(
+            self.x - rhs.x,
+            self.y - rhs.y,
+            self.z - rhs.z,
+            self.w - rhs.w,
+        )
     }
 }
 
@@ -102,6 +115,16 @@ impl ops::Div<f32> for Tuple {
 
     fn div(self, rhs: f32) -> Self::Output {
         Tuple::raw(self.x / rhs, self.y / rhs, self.z / rhs, self.w / rhs)
+    }
+}
+
+impl fmt::Debug for Tuple {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "({:?}, {:?}, {:?}, {:?})",
+            self.x, self.y, self.z, self.w
+        )
     }
 }
 
@@ -230,7 +253,10 @@ mod tests {
     #[test]
     fn normalise_works_for_complex_vector() {
         let v = Tuple::vector(1.0, 2.0, 3.0);
-        assert_eq!(v.normalise(), Tuple::vector(0.26726124, 0.5345225, 0.8017837));
+        assert_eq!(
+            v.normalise(),
+            Tuple::vector(0.26726124, 0.5345225, 0.8017837)
+        );
     }
 
     #[test]
