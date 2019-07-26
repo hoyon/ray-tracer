@@ -11,7 +11,7 @@ pub struct Colour {
 
 impl Colour {
     fn new(r: f32, g: f32, b: f32) -> Self {
-        Colour {r, g, b}
+        Colour { r, g, b }
     }
 }
 
@@ -27,11 +27,7 @@ impl ops::Add for Colour {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Colour::new(
-            self.r + rhs.r,
-            self.g + rhs.g,
-            self.b + rhs.b,
-        )
+        Colour::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }
 
@@ -39,11 +35,7 @@ impl ops::Sub for Colour {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Colour::new(
-            self.r - rhs.r,
-            self.g - rhs.g,
-            self.b - rhs.b,
-        )
+        Colour::new(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
     }
 }
 
@@ -51,11 +43,7 @@ impl ops::Mul<f32> for Colour {
     type Output = Self;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        Colour::new(
-            self.r * rhs,
-            self.g * rhs,
-            self.b * rhs,
-        )
+        Colour::new(self.r * rhs, self.g * rhs, self.b * rhs)
     }
 }
 
@@ -63,11 +51,7 @@ impl ops::Mul for Colour {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Colour::new(
-            self.r * rhs.r,
-            self.g * rhs.g,
-            self.b * rhs.b,
-        )
+        Colour::new(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
     }
 }
 
@@ -78,7 +62,14 @@ mod tests {
     #[test]
     fn can_create_new_colour() {
         let colour = Colour::new(1.1, 2.2, 3.3);
-        assert_eq!(colour, Colour{r: 1.1, g: 2.2, b: 3.3});
+        assert_eq!(
+            colour,
+            Colour {
+                r: 1.1,
+                g: 2.2,
+                b: 3.3
+            }
+        );
     }
 
     #[test]

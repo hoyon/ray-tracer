@@ -1,6 +1,6 @@
+use crate::util;
 use std::fmt;
 use std::ops;
-use crate::util;
 
 #[derive(Clone, Copy)]
 pub struct Tuple {
