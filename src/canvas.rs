@@ -32,16 +32,16 @@ impl Canvas {
 
         let mut data = String::new();
 
-        let mut row_strings = Vec::with_capacity((self.width * 3) as usize);
+        let mut row_numbers = Vec::with_capacity((self.width * 3) as usize);
 
         for row in 0..self.height {
             for col in 0..self.width {
                 let colour_strings = format_colour(&self.read_pixel(col, row));
-                row_strings.extend_from_slice(&colour_strings);
+                row_numbers.extend_from_slice(&colour_strings);
             }
-            data.push_str(&split_long_line(&row_strings));
+            data.push_str(&combine_numbers(&row_numbers));
             data.push_str("\n");
-            row_strings.clear();
+            row_numbers.clear();
         }
 
         header + &data
@@ -63,7 +63,7 @@ fn convert_pixel(pixel: f32) -> u8 {
     (pixel.min(1.0).max(0.0) * 255.0).round() as u8
 }
 
-fn split_long_line(numbers: &[String]) -> String {
+fn combine_numbers(numbers: &[String]) -> String {
     let mut lines = Vec::new();
     let mut current_line = String::with_capacity(70);
     for n in numbers {
