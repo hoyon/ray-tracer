@@ -54,16 +54,29 @@ impl Matrix {
         self.data[idx as usize] = value;
     }
 
+    pub fn transpose(&self) -> Matrix {
+        assert!(self.rows == self.cols, "Can only transpose square matrices");
+
+        let mut ret = self.clone();
+
+        for r in 0..self.rows {
+            for c in 0..self.cols {
+                ret.set_cell(r, c, self.at(c, r));
+            }
+        }
+        ret
+    }
+
     fn row(&self, r: u32) -> Tuple {
         assert!(r < 4);
-        assert!(self.is_4x4(), "Can only get row of 4x4 matrix");
+        assert!(self.is_4x4(), "Can only get row of 4x4 matrices");
 
         Tuple::raw(self.at(r, 0), self.at(r, 1), self.at(r, 2), self.at(r, 3))
     }
 
     fn col(&self, c: u32) -> Tuple {
         assert!(c < 4);
-        assert!(self.is_4x4(), "Can only get col of 4x4 matrix");
+        assert!(self.is_4x4(), "Can only get col of 4x4 matrices");
 
         Tuple::raw(self.at(0, c), self.at(1, c), self.at(2, c), self.at(3, c))
     }
@@ -74,9 +87,9 @@ impl Matrix {
 
     pub fn identity() -> Matrix {
         Matrix::new4x4(1.0, 0.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    0.0, 0.0, 0.0, 1.0)
+                       0.0, 1.0, 0.0, 0.0,
+                       0.0, 0.0, 1.0, 0.0,
+                       0.0, 0.0, 0.0, 1.0)
     }
 }
 
@@ -257,5 +270,25 @@ mod tests {
         let t = Tuple::raw(1.0, 2.0, 3.0, 1.0);
 
         assert_eq!(t, Matrix::identity() * t);
+    }
+
+    #[test]
+    fn test_transpose_works() {
+        let m = Matrix::new4x4(1.0, 2.0, 3.0, 4.0,
+                               2.0, 4.0, 4.0, 2.0,
+                               8.0, 6.0, 4.0, 1.0,
+                               0.0, 0.0, 0.0, 1.0);
+
+        let e = Matrix::new4x4(1.0, 2.0, 8.0, 0.0,
+                               2.0, 4.0, 6.0, 0.0,
+                               3.0, 4.0, 4.0, 0.0,
+                               4.0, 2.0, 1.0, 1.0);
+
+        assert_eq!(e, m.transpose());
+    }
+
+    #[test]
+    fn test_transpose_identity() {
+        assert_eq!(Matrix::identity(), Matrix::identity().transpose());
     }
 }
