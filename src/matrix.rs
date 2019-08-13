@@ -67,22 +67,30 @@ impl Matrix {
         ret
     }
 
+    pub fn determinant(&self) -> f32 {
+        if self.has_size(2) {
+            self.at(0, 0) * self.at(1, 1) - self.at(0, 1) * self.at(1, 0)
+        } else {
+            unimplemented!()
+        }
+    }
+
     fn row(&self, r: u32) -> Tuple {
         assert!(r < 4);
-        assert!(self.is_4x4(), "Can only get row of 4x4 matrices");
+        assert!(self.has_size(4), "Can only get row of 4x4 matrices");
 
         Tuple::raw(self.at(r, 0), self.at(r, 1), self.at(r, 2), self.at(r, 3))
     }
 
     fn col(&self, c: u32) -> Tuple {
         assert!(c < 4);
-        assert!(self.is_4x4(), "Can only get col of 4x4 matrices");
+        assert!(self.has_size(4), "Can only get col of 4x4 matrices");
 
         Tuple::raw(self.at(0, c), self.at(1, c), self.at(2, c), self.at(3, c))
     }
 
-    fn is_4x4(&self) -> bool {
-        self.rows == 4 && self.cols == 4
+    fn has_size(&self, size: u32) -> bool {
+        self.rows == size && self.cols == size
     }
 
     pub fn identity() -> Matrix {
@@ -112,7 +120,7 @@ impl ops::Mul<Matrix> for Matrix {
     type Output = Self;
 
     fn mul(self, rhs: Matrix) -> Self::Output {
-        assert!(self.is_4x4() && rhs.is_4x4(), "Can only multiply 4x4 matrices");
+        assert!(self.has_size(4) && rhs.has_size(4), "Can only multiply 4x4 matrices");
 
         let mut ret = self.clone();
 
@@ -290,5 +298,13 @@ mod tests {
     #[test]
     fn test_transpose_identity() {
         assert_eq!(Matrix::identity(), Matrix::identity().transpose());
+    }
+
+    #[test]
+    fn test_determinant_of_2x2_matrix() {
+        let m = Matrix::new2x2(1.0, 5.0,
+                               -3.0, 2.0);
+
+        assert_eq!(m.determinant(), 17.0);
     }
 }
