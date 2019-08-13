@@ -71,6 +71,13 @@ impl Matrix {
     fn is_4x4(&self) -> bool {
         self.rows == 4 && self.cols == 4
     }
+
+    pub fn identity() -> Matrix {
+        Matrix::new4x4(1.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0)
+    }
 }
 
 impl PartialEq for Matrix {
@@ -233,5 +240,22 @@ mod tests {
         let b = Tuple::raw(1.0, 2.0, 3.0, 1.0);
 
         assert_eq!(a * b, Tuple::raw(18.0, 24.0, 33.0, 1.0));
+    }
+
+    #[test]
+    fn test_multiplying_matrix_with_identity() {
+        let m = Matrix::new4x4(1.0, 2.0, 3.0, 4.0,
+                               2.0, 4.0, 4.0, 2.0,
+                               8.0, 6.0, 4.0, 1.0,
+                               0.0, 0.0, 0.0, 1.0);
+
+        assert_eq!(m.clone(), m * Matrix::identity());
+    }
+
+    #[test]
+    fn test_multiplying_tuple_with_identity() {
+        let t = Tuple::raw(1.0, 2.0, 3.0, 1.0);
+
+        assert_eq!(t, Matrix::identity() * t);
     }
 }
