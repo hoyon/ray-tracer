@@ -1,6 +1,7 @@
-use crate::util;
+use crate::{Tuple, util};
+use std::ops;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matrix {
     pub rows: u32,
     pub cols: u32,
@@ -47,6 +48,29 @@ impl Matrix {
         let idx = r * self.cols + c;
         self.data[idx as usize]
     }
+
+    fn set_cell(&mut self, r: u32, c: u32, value: f32) {
+        let idx = r * self.cols + c;
+        self.data[idx as usize] = value;
+    }
+
+    fn row(&self, r: u32) -> Tuple {
+        assert!(r < 4);
+        assert!(self.is_4x4(), "Can only get row of 4x4 matrix");
+
+        Tuple::raw(self.at(r, 0), self.at(r, 1), self.at(r, 2), self.at(r, 3))
+    }
+
+    fn col(&self, c: u32) -> Tuple {
+        assert!(c < 4);
+        assert!(self.is_4x4(), "Can only get col of 4x4 matrix");
+
+        Tuple::raw(self.at(0, c), self.at(1, c), self.at(2, c), self.at(3, c))
+    }
+
+    fn is_4x4(&self) -> bool {
+        self.rows == 4 && self.cols == 4
+    }
 }
 
 impl PartialEq for Matrix {
@@ -61,6 +85,42 @@ impl PartialEq for Matrix {
             }
             true
         }
+    }
+}
+
+impl ops::Mul<Matrix> for Matrix {
+    type Output = Self;
+
+    fn mul(self, rhs: Matrix) -> Self::Output {
+        assert!(self.is_4x4() && rhs.is_4x4(), "Can only multiply 4x4 matrices");
+
+        let mut ret = self.clone();
+
+        for row in 0..=3 {
+            for col in 0..=3 {
+                let value = Tuple::dot(&self.row(row), &rhs.col(col));
+                ret.set_cell(row, col, value);
+            }
+        }
+
+        ret
+    }
+}
+
+impl ops::Mul<Tuple> for Matrix {
+    type Output = Tuple;
+
+    fn mul(self, rhs: Tuple) -> Self::Output {
+        assert!(self.rows == 4 && self.cols == 4, "Can only multiply 4x4 matrix with tuple");
+
+        let mut ret = rhs;
+
+        ret.x = Tuple::dot(&rhs, &self.row(0));
+        ret.y = Tuple::dot(&rhs, &self.row(1));
+        ret.z = Tuple::dot(&rhs, &self.row(2));
+        ret.w = Tuple::dot(&rhs, &self.row(3));
+
+        ret
     }
 }
 
@@ -134,5 +194,44 @@ mod tests {
         let b = Matrix::new2x2(2.0, 2.0, 2.0, 2.0);
 
         assert!(a != b);
+    }
+
+    #[test]
+    fn test_can_multiple_4x4_matrices() {
+        let a = Matrix::new4x4(1.0, 2.0, 3.0, 4.0,
+                               5.0, 6.0, 7.0, 8.0,
+                               9.0, 8.0, 7.0, 6.0,
+                               5.0, 4.0, 3.0, 2.0);
+
+        let b = Matrix::new4x4(-2.0, 1.0, 2.0, 3.0,
+                               3.0, 2.0, 1.0, -1.0,
+                               4.0, 3.0, 6.0, 5.0,
+                               1.0, 2.0, 7.0, 8.0);
+
+        let expected = Matrix::new4x4(20.0, 22.0, 50.0, 48.0,
+                                      44.0, 54.0, 114.0, 108.0,
+                                      40.0, 58.0, 110.0, 102.0,
+                                      16.0, 26.0, 46.0, 42.0);
+
+        assert_eq!(expected, a * b);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cannot_multiply_other_matrix_sizes() {
+        let m = Matrix::new2x2(1.0, 1.0, 1.0, 1.0);
+        let _ = m.clone() * m;
+    }
+
+    #[test]
+    fn test_can_multiple_matrix_4x4_with_tuple() {
+        let a = Matrix::new4x4(1.0, 2.0, 3.0, 4.0,
+                               2.0, 4.0, 4.0, 2.0,
+                               8.0, 6.0, 4.0, 1.0,
+                               0.0, 0.0, 0.0, 1.0);
+
+        let b = Tuple::raw(1.0, 2.0, 3.0, 1.0);
+
+        assert_eq!(a * b, Tuple::raw(18.0, 24.0, 33.0, 1.0));
     }
 }
