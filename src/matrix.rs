@@ -71,7 +71,12 @@ impl Matrix {
         if self.has_size(2) {
             self.at(0, 0) * self.at(1, 1) - self.at(0, 1) * self.at(1, 0)
         } else {
-            unimplemented!()
+            let mut det = 0.0;
+            for i in 0..self.cols {
+                det += self.at(0, i) * self.cofactor(0, i)
+            }
+
+            det
         }
     }
 
@@ -346,6 +351,32 @@ mod tests {
                                -3.0, 2.0);
 
         assert_eq!(m.determinant(), 17.0);
+    }
+
+    #[test]
+    fn test_determinant_of_3x3_matrix() {
+        let m = Matrix::new3x3(1.0, 2.0, 6.0,
+                               -5.0, 8.0, -4.0,
+                               2.0, 6.0, 4.0);
+
+        assert_eq!(m.cofactor(0, 0), 56.0);
+        assert_eq!(m.cofactor(0, 1), 12.0);
+        assert_eq!(m.cofactor(0, 2), -46.0);
+        assert_eq!(m.determinant(), -196.0);
+    }
+
+    #[test]
+    fn test_determinant_of_4x4_matrix() {
+        let m = Matrix::new4x4(-2.0, -8.0, 3.0, 5.0,
+                               -3.0, 1.0, 7.0, 3.0,
+                               1.0, 2.0, -9.0, 6.0,
+                               -6.0, 7.0, 7.0, -9.0);
+
+        assert_eq!(m.cofactor(0, 0), 690.0);
+        assert_eq!(m.cofactor(0, 1), 447.0);
+        assert_eq!(m.cofactor(0, 2), 210.0);
+        assert_eq!(m.cofactor(0, 3), 51.0);
+        assert_eq!(m.determinant(), -4071.0);
     }
 
     #[test]
