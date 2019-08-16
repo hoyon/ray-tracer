@@ -120,6 +120,23 @@ impl Matrix {
         }
     }
 
+    pub fn invert(&self) -> Matrix {
+        let det = self.determinant();
+        assert!(det != 0.0);
+
+        let mut ret = self.clone();
+
+        for r in 0..ret.rows {
+            for c in 0..ret.cols {
+                let co = self.cofactor(r, c);
+
+                ret.set_cell(c, r, co / det);
+            }
+        }
+
+        ret
+    }
+
     fn row(&self, r: u32) -> Tuple {
         assert!(r < 4);
         assert!(self.has_size(4), "Can only get row of 4x4 matrices");
@@ -436,5 +453,65 @@ mod tests {
         assert_eq!(matrix.cofactor(0, 0), -12.0);
         assert_eq!(matrix.minor(1, 0), 25.0);
         assert_eq!(matrix.cofactor(1, 0), -25.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invert_uninvertable_matrix() {
+        let matrix = Matrix::new4x4(-4.0, 2.0, -2.0, -3.0,
+                                    9.0, 6.0, 2.0, 6.0,
+                                    0.0, -5.0, 1.0, -5.0,
+                                    0.0, 0.0, 0.0, 0.0);
+
+        assert_eq!(matrix.determinant(), 0.0);
+        matrix.invert();
+    }
+
+    #[test]
+    fn test_invert() {
+        let matrix = Matrix::new4x4(-5.0, 2.0, 6.0, -8.0,
+                                    1.0, -5.0, 1.0, 8.0,
+                                    7.0, 7.0, -6.0, -7.0,
+                                    1.0, -3.0, 7.0, 4.0);
+
+        let expected = Matrix::new4x4(0.21804512, 0.45112783, 0.24060151, -0.04511278,
+                                      -0.8082707, -1.456767, -0.44360903, 0.5206767,
+                                      -0.078947365, -0.2236842, -0.05263158, 0.19736843,
+                                      -0.52255636, -0.81390977, -0.30075186, 0.30639097);
+
+        let inverted = matrix.invert();
+
+        assert_eq!(matrix.determinant(), 532.0);
+        assert_eq!(matrix.cofactor(2, 3), -160.0);
+        assert_eq!(inverted.at(3, 2), -160.0 / 532.0);
+        assert_eq!(matrix.cofactor(3, 2), 105.0);
+        assert_eq!(inverted.at(2, 3), 105.0 / 532.0);
+        assert_eq!(inverted, expected);
+    }
+
+    #[test]
+    fn can_multiple_product_by_inverse() {
+        let a = Matrix::new4x4(3.0, -9.0, 7.0, 3.0,
+                               3.0, -8.0, 2.0, -9.0,
+                               -4.0, 4.0, 4.0, 1.0,
+                               -6.0, 5.0, -1.0, 1.0);
+
+        let b = Matrix::new4x4(8.0, 2.0, 2.0, 2.0,
+                               3.0, -1.0, 7.0, 0.0,
+                               7.0, 0.0, 5.0, 4.0,
+                               6.0, -2.0, 0.0, 5.0);
+
+        let c = a.clone() * b.clone();
+
+        assert!(approx_equal(c * b.invert(), a));
+    }
+
+    fn approx_equal(a: Matrix, b: Matrix) -> bool {
+        for i in 0..a.data.len() {
+            if (a.data[i] - b.data[i]).abs() > 0.001 {
+                return false;
+            }
+        }
+        true
     }
 }
