@@ -75,6 +75,31 @@ impl Matrix {
         }
     }
 
+    pub fn submatrix(&self, row: u32, col: u32) -> Matrix {
+        assert!(self.rows > row && self.cols > col);
+
+        let mut result = self.clone();
+
+        // remove column
+        let index = col;
+        for i in 0..result.rows {
+            let original_index = index + i * result.cols;
+            // index changes every time item is deleted
+            let adjusted_index = original_index - i;
+            result.data.remove(adjusted_index as usize);
+        }
+        result.cols -= 1;
+
+        // remove row
+        let index = row * result.cols;
+        for _ in 0..result.cols {
+            result.data.remove(index as usize);
+        }
+        result.rows -= 1;
+
+        result
+    }
+
     fn row(&self, r: u32) -> Tuple {
         assert!(r < 4);
         assert!(self.has_size(4), "Can only get row of 4x4 matrices");
@@ -306,5 +331,40 @@ mod tests {
                                -3.0, 2.0);
 
         assert_eq!(m.determinant(), 17.0);
+    }
+
+    #[test]
+    fn test_submatrix_of_3x3() {
+        let matrix = Matrix::new3x3(-3.0, 5.0, 0.0,
+                                    1.0, -2.0, -7.0,
+                                    0.0, 1.0, 1.0);
+
+        let expected = Matrix::new2x2(1.0, -2.0,
+                                      0.0, 1.0);
+
+        assert_eq!(expected, matrix.submatrix(0, 2));
+
+        let matrix = Matrix::new3x3(-3.0, 5.0, 0.0,
+                                    1.0, -2.0, -7.0,
+                                    0.0, 1.0, 1.0);
+
+        let expected = Matrix::new2x2(-3.0, 5.0,
+                                      0.0, 1.0);
+
+        assert_eq!(expected, matrix.submatrix(1, 2));
+    }
+
+    #[test]
+    fn test_submatrix_of_4x4() {
+        let matrix = Matrix::new4x4(1.0, 2.0, 3.0, 4.0,
+                                    2.0, 4.0, 4.0, 2.0,
+                                    8.0, 6.0, 4.0, 1.0,
+                                    0.0, 0.0, 0.0, 1.0);
+
+        let expected = Matrix::new3x3(1.0, 3.0, 4.0,
+                                      2.0, 4.0, 2.0,
+                                      0.0, 0.0, 1.0);
+
+        assert_eq!(expected, matrix.submatrix(2, 1));
     }
 }
