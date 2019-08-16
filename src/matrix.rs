@@ -100,6 +100,21 @@ impl Matrix {
         result
     }
 
+    pub fn minor(&self, row: u32, col: u32) -> f32 {
+        let sub = self.submatrix(row, col);
+        sub.determinant()
+    }
+
+    pub fn cofactor(&self, row: u32, col: u32) -> f32 {
+        let minor = self.minor(row, col);
+
+        if (row + col) % 2 == 0 {
+            minor
+        } else {
+            -minor
+        }
+    }
+
     fn row(&self, r: u32) -> Tuple {
         assert!(r < 4);
         assert!(self.has_size(4), "Can only get row of 4x4 matrices");
@@ -366,5 +381,29 @@ mod tests {
                                       0.0, 0.0, 1.0);
 
         assert_eq!(expected, matrix.submatrix(2, 1));
+    }
+
+    #[test]
+    fn test_minor_of_3x3() {
+        let matrix = Matrix::new3x3(3.0, 5.0, 0.0,
+                                    2.0, -1.0, -7.0,
+                                    6.0, -1.0, 5.0);
+
+        let sub = matrix.submatrix(1, 0);
+
+        assert_eq!(sub.determinant(), 25.0);
+        assert_eq!(matrix.minor(1, 0), 25.0);
+    }
+
+    #[test]
+    fn test_cofactor_of_3x3() {
+        let matrix = Matrix::new3x3(3.0, 5.0, 0.0,
+                                    2.0, -1.0, -7.0,
+                                    6.0, -1.0, 5.0);
+
+        assert_eq!(matrix.minor(0, 0), -12.0);
+        assert_eq!(matrix.cofactor(0, 0), -12.0);
+        assert_eq!(matrix.minor(1, 0), 25.0);
+        assert_eq!(matrix.cofactor(1, 0), -25.0);
     }
 }
