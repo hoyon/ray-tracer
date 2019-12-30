@@ -170,6 +170,15 @@ impl Matrix {
 
         base
     }
+
+    pub fn scaling(x: f32, y: f32, z: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(0, 0, x);
+        base.set_cell(1, 1, y);
+        base.set_cell(2, 2, z);
+
+        base
+    }
 }
 
 impl PartialEq for Matrix {
@@ -516,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    fn multiplying_by_a_translation_matrix() {
+    fn translating_at_point() {
         let transformation = Matrix::translation(5.0, -3.0, 2.0);
         let p = Tuple::point(-3.0, 4.0, 5.0);
 
@@ -524,7 +533,7 @@ mod tests {
     }
 
     #[test]
-    fn multiplying_by_inverse_of_translation_matrix() {
+    fn translating_at_point_inverse() {
         let transformation = Matrix::translation(5.0, -3.0, 2.0);
         let inv = transformation.invert();
         let p = Tuple::point(-3.0, 4.0, 5.0);
@@ -538,6 +547,38 @@ mod tests {
         let v = Tuple::vector(-3.0, 4.0, 5.0);
 
         assert_eq!(transformation * v, v);
+    }
+
+    #[test]
+    fn scaling_a_point() {
+        let transformation = Matrix::scaling(2.0, 3.0, 4.0);
+        let p = Tuple::point(-4.0, 6.0, 8.0);
+
+        assert_eq!(transformation * p, Tuple::point(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn scaling_a_vector() {
+        let transformation = Matrix::scaling(2.0, 3.0, 4.0);
+        let v = Tuple::vector(-4.0, 6.0, 8.0);
+
+        assert_eq!(transformation * v, Tuple::vector(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn scaling_a_vector_inverse() {
+        let transformation = Matrix::scaling(2.0, 3.0, 4.0);
+        let inv = transformation.invert();
+        let v = Tuple::vector(-4.0, 6.0, 8.0);
+
+        assert_eq!(inv * v, Tuple::vector(-2.0, 2.0, 2.0));
+    }
+
+    #[test]
+    fn negative_scaling_is_reflection() {
+        let transformation = Matrix::scaling(-1.0, 1.0, 1.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert_eq!(transformation * p, Tuple::point(-2.0, 3.0, 4.0));
     }
 
     fn approx_equal(a: Matrix, b: Matrix) -> bool {
