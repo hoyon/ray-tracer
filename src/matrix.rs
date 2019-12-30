@@ -161,6 +161,15 @@ impl Matrix {
                        0.0, 0.0, 1.0, 0.0,
                        0.0, 0.0, 0.0, 1.0)
     }
+
+    pub fn translation(x: f32, y: f32, z: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(0, 3, x);
+        base.set_cell(1, 3, y);
+        base.set_cell(2, 3, z);
+
+        base
+    }
 }
 
 impl PartialEq for Matrix {
@@ -504,6 +513,31 @@ mod tests {
         let c = a.clone() * b.clone();
 
         assert!(approx_equal(c * b.invert(), a));
+    }
+
+    #[test]
+    fn multiplying_by_a_translation_matrix() {
+        let transformation = Matrix::translation(5.0, -3.0, 2.0);
+        let p = Tuple::point(-3.0, 4.0, 5.0);
+
+        assert_eq!(transformation * p, Tuple::point(2.0, 1.0, 7.0));
+    }
+
+    #[test]
+    fn multiplying_by_inverse_of_translation_matrix() {
+        let transformation = Matrix::translation(5.0, -3.0, 2.0);
+        let inv = transformation.invert();
+        let p = Tuple::point(-3.0, 4.0, 5.0);
+
+        assert_eq!(inv * p, Tuple::point(-8.0, 7.0, 3.0));
+    }
+
+    #[test]
+    fn translation_does_not_affect_vectors() {
+        let transformation = Matrix::translation(5.0, -3.0, 2.0);
+        let v = Tuple::vector(-3.0, 4.0, 5.0);
+
+        assert_eq!(transformation * v, v);
     }
 
     fn approx_equal(a: Matrix, b: Matrix) -> bool {
