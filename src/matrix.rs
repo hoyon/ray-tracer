@@ -209,6 +209,18 @@ impl Matrix {
 
         base
     }
+
+    pub fn shearing(x_y: f32, x_z: f32, y_x: f32, y_z: f32, z_x: f32, z_y: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(0, 1, x_y);
+        base.set_cell(0, 2, x_z);
+        base.set_cell(1, 0, y_x);
+        base.set_cell(1, 2, y_z);
+        base.set_cell(2, 0, z_x);
+        base.set_cell(2, 1, z_y);
+
+        base
+    }
 }
 
 impl PartialEq for Matrix {
@@ -649,6 +661,54 @@ mod tests {
 
         assert_eq!(half_quarter * p, Tuple::point(- SQRT_2 / 2.0, SQRT_2 / 2.0, 0.0));
         assert_eq!(full_quarter * p, Tuple::point(-1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn shearing_point_x_in_proportion_to_y() {
+        let transformation = Matrix::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(5.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_point_x_in_proportion_to_z() {
+        let transformation = Matrix::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(6.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_point_y_in_proportion_to_x() {
+        let transformation = Matrix::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(2.0, 5.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_point_y_in_proportion_to_z() {
+        let transformation = Matrix::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(2.0, 7.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_point_z_in_proportion_to_x() {
+        let transformation = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(2.0, 3.0, 6.0));
+    }
+
+    #[test]
+    fn shearing_point_z_in_proportion_to_y() {
+        let transformation = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_eq!(transformation * p, Tuple::point(2.0, 3.0, 7.0));
     }
 
     fn approx_equal(a: Matrix, b: Matrix) -> bool {
