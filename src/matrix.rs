@@ -179,6 +179,36 @@ impl Matrix {
 
         base
     }
+
+    pub fn rotation_x(rad: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(1, 1, rad.cos());
+        base.set_cell(2, 1, rad.sin());
+        base.set_cell(1, 2, -rad.sin());
+        base.set_cell(2, 2, rad.cos());
+
+        base
+    }
+
+    pub fn rotation_y(rad: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(0, 0, rad.cos());
+        base.set_cell(0, 2, rad.sin());
+        base.set_cell(2, 0, -rad.sin());
+        base.set_cell(2, 2, rad.cos());
+
+        base
+    }
+
+    pub fn rotation_z(rad: f32) -> Matrix {
+        let mut base = Matrix::identity();
+        base.set_cell(0, 0, rad.cos());
+        base.set_cell(0, 1, -rad.sin());
+        base.set_cell(1, 0, rad.sin());
+        base.set_cell(1, 1, rad.cos());
+
+        base
+    }
 }
 
 impl PartialEq for Matrix {
@@ -235,6 +265,7 @@ impl ops::Mul<Tuple> for Matrix {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::f32::consts::*;
 
     #[test]
     fn test_new4x4_creates_a_matrix() {
@@ -579,6 +610,45 @@ mod tests {
         let transformation = Matrix::scaling(-1.0, 1.0, 1.0);
         let p = Tuple::point(2.0, 3.0, 4.0);
         assert_eq!(transformation * p, Tuple::point(-2.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn rotating_point_around_x_axis() {
+        let half_quarter = Matrix::rotation_x(PI / 4.0);
+        let full_quarter = Matrix::rotation_x(PI / 2.0);
+        let p = Tuple::point(0.0, 1.0, 0.0);
+
+        assert_eq!(half_quarter * p, Tuple::point(0.0, SQRT_2 / 2.0, SQRT_2 / 2.0));
+        assert_eq!(full_quarter * p, Tuple::point(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn rotating_point_around_x_axis_inverse() {
+        let half_quarter = Matrix::rotation_x(PI / 4.0);
+        let inv = half_quarter.invert();
+        let p = Tuple::point(0.0, 1.0, 0.0);
+
+        assert_eq!(inv * p, Tuple::point(0.0, SQRT_2 / 2.0, - SQRT_2 / 2.0));
+    }
+
+    #[test]
+    fn rotating_point_around_y_axis() {
+        let half_quarter = Matrix::rotation_y(PI / 4.0);
+        let full_quarter = Matrix::rotation_y(PI / 2.0);
+        let p = Tuple::point(0.0, 0.0, 1.0);
+
+        assert_eq!(half_quarter * p, Tuple::point(SQRT_2 / 2.0, 0.0, SQRT_2 / 2.0));
+        assert_eq!(full_quarter * p, Tuple::point(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn rotating_point_around_z_axis() {
+        let half_quarter = Matrix::rotation_z(PI / 4.0);
+        let full_quarter = Matrix::rotation_z(PI / 2.0);
+        let p = Tuple::point(0.0, 1.0, 0.0);
+
+        assert_eq!(half_quarter * p, Tuple::point(- SQRT_2 / 2.0, SQRT_2 / 2.0, 0.0));
+        assert_eq!(full_quarter * p, Tuple::point(-1.0, 0.0, 0.0));
     }
 
     fn approx_equal(a: Matrix, b: Matrix) -> bool {
