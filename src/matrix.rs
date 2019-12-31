@@ -221,6 +221,26 @@ impl Matrix {
 
         base
     }
+
+    pub fn translate(&self, x: f32, y: f32, z: f32) -> Matrix {
+        Matrix::translation(x, y, z) * self.clone()
+    }
+
+    pub fn scale(&self, x: f32, y: f32, z: f32) -> Matrix {
+        Matrix::scaling(x, y, z) * self.clone()
+    }
+
+    pub fn rotate_x(&self, radians: f32) -> Matrix {
+        Matrix::rotation_x(radians) * self.clone()
+    }
+
+    pub fn rotate_y(&self, radians: f32) -> Matrix {
+        Matrix::rotation_y(radians) * self.clone()
+    }
+
+    pub fn rotate_z(&self, radians: f32) -> Matrix {
+        Matrix::rotation_z(radians) * self.clone()
+    }
 }
 
 impl PartialEq for Matrix {
@@ -709,6 +729,38 @@ mod tests {
         let p = Tuple::point(2.0, 3.0, 4.0);
 
         assert_eq!(transformation * p, Tuple::point(2.0, 3.0, 7.0));
+    }
+
+    #[test]
+    fn transformations_are_applied_in_sequence() {
+        let p = Tuple::point(1.0, 0.0, 1.0);
+        let rotation = Matrix::rotation_x(FRAC_PI_2);
+        let scaling = Matrix::scaling(5.0, 5.0, 5.0);
+        let translation = Matrix::translation(10.0, 5.0, 7.0);
+
+        let p2 = rotation.clone() * p;
+        assert_eq!(p2, Tuple::point(1.0, -1.0, 0.0));
+
+        let p3 = scaling.clone() * p2;
+        assert_eq!(p3, Tuple::point(5.0, -5.0, -0.0000002));
+
+        let p4 = translation.clone() * p3;
+        assert_eq!(p4, Tuple::point(15.0, 0.0, 7.0));
+
+        let transformation = translation * scaling * rotation;
+        assert_eq!(transformation * p, Tuple::point(15.0, 0.0, 7.0));
+    }
+
+    #[test]
+    fn transformations_fluent_api() {
+        let p = Tuple::point(1.0, 0.0, 1.0);
+        let transformation =
+            Matrix::identity()
+            .rotate_x(FRAC_PI_2)
+            .scale(5.0, 5.0, 5.0)
+            .translate(10.0, 5.0, 7.0);
+
+        assert_eq!(transformation * p, Tuple::point(15.0, 0.0, 7.0));
     }
 
     fn approx_equal(a: Matrix, b: Matrix) -> bool {
