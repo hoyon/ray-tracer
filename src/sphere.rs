@@ -1,6 +1,9 @@
 use crate::{Tuple, Ray};
+use std::cell::Cell;
 
-static mut NEXT_ID: u32 = 0;
+thread_local! {
+    static NEXT_ID_COUNTER: Cell<u32> = Cell::new(0);
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Sphere {
@@ -9,10 +12,11 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new() -> Self {
-        let id = unsafe { NEXT_ID };
-        unsafe {
-            NEXT_ID += 1;
-        }
+        let id = NEXT_ID_COUNTER.with(|next_id| {
+            let next = next_id.get();
+            next_id.set(next + 1);
+            next
+        });
         Sphere{id}
     }
 
