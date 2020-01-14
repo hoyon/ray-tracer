@@ -223,23 +223,23 @@ impl Matrix {
     }
 
     pub fn translate(&self, x: f32, y: f32, z: f32) -> Matrix {
-        Matrix::translation(x, y, z) * self.clone()
+        Matrix::translation(x, y, z) * self
     }
 
     pub fn scale(&self, x: f32, y: f32, z: f32) -> Matrix {
-        Matrix::scaling(x, y, z) * self.clone()
+        Matrix::scaling(x, y, z) * self
     }
 
     pub fn rotate_x(&self, radians: f32) -> Matrix {
-        Matrix::rotation_x(radians) * self.clone()
+        Matrix::rotation_x(radians) * self
     }
 
     pub fn rotate_y(&self, radians: f32) -> Matrix {
-        Matrix::rotation_y(radians) * self.clone()
+        Matrix::rotation_y(radians) * self
     }
 
     pub fn rotate_z(&self, radians: f32) -> Matrix {
-        Matrix::rotation_z(radians) * self.clone()
+        Matrix::rotation_z(radians) * self
     }
 }
 
@@ -259,9 +259,33 @@ impl PartialEq for Matrix {
 }
 
 impl ops::Mul<Matrix> for Matrix {
-    type Output = Self;
+    type Output = Matrix;
 
     fn mul(self, rhs: Matrix) -> Self::Output {
+        &self * &rhs
+    }
+}
+
+impl ops::Mul<&Matrix> for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: &Matrix) -> Self::Output {
+        &self * rhs
+    }
+}
+
+impl ops::Mul<Matrix> for &Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: Matrix) -> Self::Output {
+        self * &rhs
+    }
+}
+
+impl ops::Mul<&Matrix> for &Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: &Matrix) -> Self::Output {
         assert!(self.has_size(4) && rhs.has_size(4), "Can only multiply 4x4 matrices");
 
         let mut ret = self.clone();
@@ -281,9 +305,33 @@ impl ops::Mul<Tuple> for Matrix {
     type Output = Tuple;
 
     fn mul(self, rhs: Tuple) -> Self::Output {
+        &self * &rhs
+    }
+}
+
+impl ops::Mul<&Tuple> for Matrix {
+    type Output = Tuple;
+
+    fn mul(self, rhs: &Tuple) -> Self::Output {
+        &self * rhs
+    }
+}
+
+impl ops::Mul<Tuple> for &Matrix {
+    type Output = Tuple;
+
+    fn mul(self, rhs: Tuple) -> Self::Output {
+        self * &rhs
+    }
+}
+
+impl ops::Mul<&Tuple> for &Matrix {
+    type Output = Tuple;
+
+    fn mul(self, rhs: &Tuple) -> Self::Output {
         assert!(self.rows == 4 && self.cols == 4, "Can only multiply 4x4 matrix with tuple");
 
-        let mut ret = rhs;
+        let mut ret = rhs.clone();
 
         ret.x = Tuple::dot(&rhs, &self.row(0));
         ret.y = Tuple::dot(&rhs, &self.row(1));
@@ -391,7 +439,7 @@ mod tests {
     #[should_panic]
     fn test_cannot_multiply_other_matrix_sizes() {
         let m = Matrix::new2x2(1.0, 1.0, 1.0, 1.0);
-        let _ = m.clone() * m;
+        let _ = &m * &m;
     }
 
     #[test]
@@ -413,7 +461,7 @@ mod tests {
                                8.0, 6.0, 4.0, 1.0,
                                0.0, 0.0, 0.0, 1.0);
 
-        assert_eq!(m.clone(), m * Matrix::identity());
+        assert_eq!(m, &m * Matrix::identity());
     }
 
     #[test]
@@ -582,7 +630,7 @@ mod tests {
                                7.0, 0.0, 5.0, 4.0,
                                6.0, -2.0, 0.0, 5.0);
 
-        let c = a.clone() * b.clone();
+        let c = &a * &b;
 
         assert!(approx_equal(c * b.invert(), a));
     }
@@ -738,16 +786,16 @@ mod tests {
         let scaling = Matrix::scaling(5.0, 5.0, 5.0);
         let translation = Matrix::translation(10.0, 5.0, 7.0);
 
-        let p2 = rotation.clone() * p;
+        let p2 = &rotation * p;
         assert_eq!(p2, Tuple::point(1.0, -1.0, 0.0));
 
-        let p3 = scaling.clone() * p2;
+        let p3 = &scaling * p2;
         assert_eq!(p3, Tuple::point(5.0, -5.0, -0.0000002));
 
-        let p4 = translation.clone() * p3;
+        let p4 = &translation * p3;
         assert_eq!(p4, Tuple::point(15.0, 0.0, 7.0));
 
-        let transformation = translation * scaling * rotation;
+        let transformation = &translation * &scaling * &rotation;
         assert_eq!(transformation * p, Tuple::point(15.0, 0.0, 7.0));
     }
 

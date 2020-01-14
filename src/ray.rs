@@ -18,8 +18,8 @@ impl Ray {
 
     pub fn transform(&self, transformation: Matrix) -> Ray {
         Ray {
-            origin: transformation.clone() * self.origin,
-            direction: transformation.clone() * self.direction
+            origin: &transformation * self.origin,
+            direction: &transformation * self.direction
         }
     }
 }
