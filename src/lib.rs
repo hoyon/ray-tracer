@@ -11,3 +11,4 @@ pub use crate::colour::Colour;
 pub use crate::tuple::Tuple;
 pub use crate::matrix::Matrix;
 pub use crate::ray::Ray;
+pub use crate::sphere::Sphere;
