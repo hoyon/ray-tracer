@@ -44,6 +44,12 @@ impl Sphere {
     }
 }
 
+impl Default for Sphere {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Intersection<'a> {
     pub t: f32,
@@ -56,7 +62,7 @@ impl<'a> Intersection<'a> {
     }
 }
 
-pub fn hit<'a>(intersections: &'a Vec<Intersection>) -> Option<&'a Intersection<'a>> {
+pub fn hit<'a>(intersections: &'a [Intersection]) -> Option<&'a Intersection<'a>> {
     intersections.iter()
                  .filter(|i| i.t >= 0.0)
                  .min_by(|a, b| a.t.partial_cmp(&b.t).unwrap())

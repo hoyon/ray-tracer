@@ -22,7 +22,7 @@ fn main() {
             let ray = Ray::new(light, direction);
             let xs = sphere.intersect(&ray);
 
-            if xs.len() != 0 {
+            if !xs.is_empty() {
                 let hit = sphere::hit(&xs);
                 let t = hit.unwrap().t;
                 let colour = Colour::new(t, t, t);

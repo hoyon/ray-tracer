@@ -331,7 +331,7 @@ impl ops::Mul<&Tuple> for &Matrix {
     fn mul(self, rhs: &Tuple) -> Self::Output {
         assert!(self.rows == 4 && self.cols == 4, "Can only multiply 4x4 matrix with tuple");
 
-        let mut ret = rhs.clone();
+        let mut ret = *rhs;
 
         ret.x = Tuple::dot(&rhs, &self.row(0));
         ret.y = Tuple::dot(&rhs, &self.row(1));
