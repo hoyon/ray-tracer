@@ -1,4 +1,4 @@
-use crate::{Tuple, Ray};
+use crate::{Matrix, Tuple, Ray};
 use std::cell::Cell;
 
 thread_local! {
@@ -7,7 +7,8 @@ thread_local! {
 
 #[derive(Debug, PartialEq)]
 pub struct Sphere {
-    pub id: u32
+    id: u32,
+    pub transform: Matrix
 }
 
 impl Sphere {
@@ -17,10 +18,13 @@ impl Sphere {
             next_id.set(next + 1);
             next
         });
-        Sphere{id}
+        let transform = Matrix::identity();
+        Sphere{id, transform}
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Vec<Intersection> {
+    pub fn intersect(&self, orig_ray: &Ray) -> Vec<Intersection> {
+        let ray = orig_ray.transform(self.transform.invert());
+
         let sphere_to_ray = ray.origin - Tuple::point(0.0, 0.0, 0.0);
 
         let a = Tuple::dot(&ray.direction, &ray.direction);
@@ -61,6 +65,12 @@ pub fn hit<'a>(intersections: &'a Vec<Intersection>) -> Option<&'a Intersection<
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn creating_new_matrix() {
+        let sphere = Sphere::new();
+        assert_eq!(sphere.transform, Matrix::identity());
+    }
 
     #[test]
     fn a_ray_intersects_at_two_points() {
@@ -174,5 +184,27 @@ mod tests {
         let xs = vec!(i1, i2, i3, i4);
         let i = hit(&xs);
         assert_eq!(*i.unwrap(), Intersection::new(2.0, &s));
+    }
+
+    #[test]
+    fn intersecting_a_scaled_sphere_with_ray() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new();
+        s.transform = Matrix::scaling(2.0, 2.0, 2.0);
+        let xs = s.intersect(&r);
+
+        assert_eq!(xs.len(), 2);
+        assert_eq!(xs[0].t, 3.0);
+        assert_eq!(xs[1].t, 7.0);
+    }
+
+    #[test]
+    fn intersecting_a_translated_sphere_with_ray() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new();
+        s.transform = Matrix::translation(5.0, 0.0, 0.0);
+        let xs = s.intersect(&r);
+
+        assert_eq!(xs.len(), 0);
     }
 }
